@@ -36,6 +36,7 @@ class Game:
         # Game loop: events - update - draw
         self.playing = True
         self.obstacle_manager.reset_obstacles()
+        self.score.reset_score()
         while self.playing:
             self.events()
             self.update()
@@ -77,17 +78,21 @@ class Game:
         half_screen_height = SCREEN_HEIGHT //2
         half_screen_width = SCREEN_WIDTH //2
         if self.death_count == 0:#mostrar mensaje bienvenida
-            font = pygame.font.Font(FONT_STYLE, 30)
+            font = pygame.font.SysFont(FONT_STYLE, 30)
             text_component = font.render("Press any key to start", True, (0,0,0))
             text_rect = text_component.get_rect()
             text_rect.center = (half_screen_width, half_screen_height)
             self.screen.blit(text_component, text_rect)
         else:
-        #mostrar mensaje de volver a jugar(tarea )
-        #mostrar el numero de muertes actuales
-        # mostrar el puntaje 
-            pass
-        self.screen.blit(RUNNING[0],(half_screen_width -30, half_screen_height -140))#mostrar icono
+            font = pygame.font.SysFont(FONT_STYLE, 30)#mostrar mensaje de volver a jugar(tarea )
+            text_component = font.render(f"You die, press any key to restart", True, (0,0,0))
+            text_rect = text_component.get_rect()
+            text_rect.center = (half_screen_width, half_screen_height)
+            self.screen.blit(text_component, text_rect)
+            text_component = font.render(f"Number of dies : {self.death_count}", True, (0,0,0))#mostrar el numero de muertes actuales
+            self.screen.blit(text_component, (half_screen_width -300 , half_screen_height +30))
+            self.score.show_score(self.screen) # mostrar el puntaje
+        self.screen.blit(RUNNING[0],(half_screen_width -35, half_screen_height -140))#mostrar icono
         pygame.display.update()#actualizar ventana
         self.handle_key_events_on_menu() #escuchar eventos
 
