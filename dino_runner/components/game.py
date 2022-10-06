@@ -34,6 +34,7 @@ class Game:
 
     def run(self):
         # Game loop: events - update - draw
+        self.game_speed = 15
         self.playing = True
         self.obstacle_manager.reset_obstacles()
         self.score.reset_score()
@@ -74,24 +75,21 @@ class Game:
         self.x_pos_bg -= self.game_speed
 
     def show_menu(self):
-        self.screen.fill((208,208,208))#pintar mi ventana
+        self.screen.fill((127,255,212))#pintar mi ventana
         half_screen_height = SCREEN_HEIGHT //2
         half_screen_width = SCREEN_WIDTH //2
+        font = pygame.font.SysFont(FONT_STYLE, 30)
         if self.death_count == 0:#mostrar mensaje bienvenida
-            font = pygame.font.SysFont(FONT_STYLE, 30)
-            text_component = font.render("Press any key to start", True, (0,0,0))
-            text_rect = text_component.get_rect()
-            text_rect.center = (half_screen_width, half_screen_height)
-            self.screen.blit(text_component, text_rect)
+            text_component = font.render("Press any key to start", True, (20,51,51))
         else:
-            font = pygame.font.SysFont(FONT_STYLE, 30)#mostrar mensaje de volver a jugar(tarea )
-            text_component = font.render(f"You die, press any key to restart", True, (0,0,0))
-            text_rect = text_component.get_rect()
-            text_rect.center = (half_screen_width, half_screen_height)
-            self.screen.blit(text_component, text_rect)
-            text_component = font.render(f"Number of dies : {self.death_count}", True, (0,0,0))#mostrar el numero de muertes actuales
+            text_component = font.render(f"Number of deaths : {self.death_count}", True, (20,51,51))#mostrar el numero de muertes actuales
             self.screen.blit(text_component, (half_screen_width -300 , half_screen_height +30))
+            text_component = font.render(f"You die, press any key to restart", True, (20,51,51)) #mostrar mensaje de volver a jugar
             self.score.show_score(self.screen) # mostrar el puntaje
+        text_rect = text_component.get_rect()
+        text_rect.center = (half_screen_width, half_screen_height)
+        self.screen.blit(text_component, text_rect)
+        
         self.screen.blit(RUNNING[0],(half_screen_width -35, half_screen_height -140))#mostrar icono
         pygame.display.update()#actualizar ventana
         self.handle_key_events_on_menu() #escuchar eventos
