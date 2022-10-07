@@ -3,8 +3,7 @@ from dino_runner.components.dinosaur import Dinosaur
 from dino_runner.components.obstacles.obstacle_manager import ObstacleManager
 from dino_runner.components.player_hearts.player_heart_manager import PlayerHeartManager
 from dino_runner.components.power_ups.power_up_manager import PowerUpManager
-from dino_runner.components.power_ups.shield import Shield
-from dino_runner.utils.constants import BG, DEFAULT_TYPE, ICON, RUNNING, SCREEN_HEIGHT, SCREEN_WIDTH, SHIELD_TYPE, TITLE, FPS
+from dino_runner.utils.constants import BG, DEFAULT_TYPE, DIE_IMG, HAMMER_TYPE, ICON, RUNNING, SCREEN_HEIGHT, SCREEN_WIDTH, SHIELD_TYPE, TITLE, FPS
 from .score import Score
 from dino_runner.utils.constants import FONT_STYLE
 
@@ -29,7 +28,6 @@ class Game:
 
         self.death_count=0
         self.score = Score()
-        # self.shields = [Shield()]
 
     def execute(self):
         self.executing = True
@@ -60,7 +58,6 @@ class Game:
         self.player.update(user_input)
         self.obstacle_manager.update(self.game_speed, self.player, self.on_death)
         self.score.update(self)
-        # self.shields[0].update(self.game_speed, self.shields)
         self.power_up_manager.update(self.game_speed, self.player, self.score.score)
 
     def draw(self):
@@ -70,13 +67,11 @@ class Game:
         self.player.draw(self.screen)
         self.obstacle_manager.draw(self.screen)
         self.score.draw(self.screen)
-        # self.shields[0].draw(self.screen)
         self.power_up_manager.draw(self.screen)
         self.draw_power_up_active(self.screen)
         self.heart_manager.draw(self.screen)
         pygame.display.update()
         pygame.display.flip()
-
 
     def draw_background(self):
         image_width = BG.get_width()
@@ -94,8 +89,10 @@ class Game:
         
         font = pygame.font.SysFont(FONT_STYLE, 30)
         if self.death_count == 0:#mostrar mensaje bienvenida
+            self.screen.blit(RUNNING[0],(half_screen_width -35, half_screen_height -140))#mostrar icono
             text_component = font.render("Press any key to start", True, (20,51,51))
         else:
+            self.screen.blit(DIE_IMG,(half_screen_width -35, half_screen_height -140))
             text_component = font.render(f"Number of deaths : {self.death_count}", True, (20,51,51))#mostrar el numero de muertes actuales
             self.screen.blit(text_component, (half_screen_width -300 , half_screen_height +30))
             text_component = font.render(f"You die, press any key to restart", True, (20,51,51)) #mostrar mensaje de volver a jugar
@@ -104,7 +101,6 @@ class Game:
         text_rect.center = (half_screen_width, half_screen_height)
         self.screen.blit(text_component, text_rect)
         
-        self.screen.blit(RUNNING[0],(half_screen_width -35, half_screen_height -140))#mostrar icono
         pygame.display.update()#actualizar ventana
         self.handle_key_events_on_menu() #escuchar eventos
 
@@ -118,15 +114,21 @@ class Game:
     def on_death(self):
         has_shield = self.player.type == SHIELD_TYPE 
         is_invencible = has_shield or self.heart_manager.heart_count > 0
-        if not has_shield:
+        has_hammer = self.player.type == HAMMER_TYPE 
+        is_revitalizing = has_hammer or self.heart_manager.heart_count > 0
+
+        if has_hammer:
+            if self.heart_manager.heart_count < 6 :
+                self.heart_manager.increase_heart()
+
+        if not has_shield and not has_hammer:
             self.heart_manager.reduce_heart()
-        
-        if not is_invencible:
+
+        if not is_invencible and not is_revitalizing:
             pygame.time.delay(500)
             self.playing = False
             self.death_count += 1
-
-        return is_invencible
+        return is_invencible and is_revitalizing 
 
     def draw_power_up_active(self, screen):
         if self.player.has_power_up:

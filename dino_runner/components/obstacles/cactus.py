@@ -1,6 +1,7 @@
 import random
 from .obstacle import Obstacles
 
+
 class SmallCactus(Obstacles):
     def __init__(self, images):
         type = random.randint(0, 2)
